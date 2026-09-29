@@ -1,1 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cute Anime Pink Game 💕</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(135deg, #ffd1dc 0%, #ffb6c1 50%, #ffc0cb 100%);
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game-container {
+            width: 100%;
+            height: 100%;
+            max-width: 500px;
+            max-height: 800px;
+            position: relative;
+            background: linear-gradient(180deg, #ffe4e1 0%, #ffc0cb 100%);
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(255, 105, 180, 0.4);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Game Header */
+        .header {
+            background: linear-gradient(90deg, #ff69b4 0%, #ff1493 100%);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(255, 20, 147, 0.3);
+            z-index: 10;
+        }
+
+        .level-display {
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .score-display {
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hearts-display {
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Game Canvas Area */
+        .game-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, #fff0f5 0%, #ffe4e1 100%);
+        }
+
+        /* Character (Player) */
+        .player {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            border-radius: 50% 50% 40% 40%;
+            animation: playerBounce 0.6s ease-in-out infinite;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            box-shadow: 0 5px 15px rgba(255, 20, 147, 0.4);
+        }
+
+        .player::before {
+            content: '✨';
+            position: absolute;
+        }
+
+        .player::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50% 50% 40% 40%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6), transparent);
+            pointer-events: none;
+        }
+
+        @keyframes playerBounce {
+            0%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            50% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+        }
+
+        /* Collectibles */
+        .heart {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            font-size: 25px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .coin {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            font-size: 20px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotateY(0deg);
+            }
+            100% {
+                transform: rotateY(360deg);
+            }
+        }
+
+        /* Obstacles */
+        .obstacle {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #9370db 0%, #ba55d3 100%);
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(147, 112, 219, 0.4);
+            animation: pulse 1s ease-in-out infinite;
+            z-index: 50;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        /* UI Buttons */
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 192, 203, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            gap: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .ui-overlay.hidden {
+            display: none;
+        }
+
+        .title {
+            font-size: 48px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            animation: titlePulse 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .game-over-text {
+            font-size: 36px;
+            font-weight: bold;
+            color: #ff1493;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            animation: bounce 0.6s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .stats-panel {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(255, 20, 147, 0.3);
+            min-width: 280px;
+        }
+
+        .stats-panel h2 {
+            color: #ff1493;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .stat-item {
+            color: #666;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #ff69b4;
+            font-size: 24px;
+        }
+
+        .button {
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 20, 147, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .button-start {
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            color: white;
+        }
+
+        .button-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 20, 147, 0.5);
+        }
+
+        .button-start:active {
+            transform: translateY(-1px);
+        }
+
+        .button-restart {
+            background: linear-gradient(135deg, #00bcd4 0%, #00838f 100%);
+            color: white;
+            margin-top: 20px;
+        }
+
+        .button-restart:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 188, 212, 0.5);
+        }
+
+        .button-restart:active {
+            transform: translateY(-1px);
+        }
+
+        /* Mobile Touch Controls */
+        .touch-controls {
+            display: none;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(180deg, transparent 0%, #ff1493 100%);
+            z-index: 150;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            padding: 20px 0;
+            gap: 10px;
+        }
+
+        .touch-controls.active {
+            display: flex;
+        }
+
+        .touch-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid white;
+            border-radius: 15px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .touch-btn:active {
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0.95);
+        }
+
+        /* Floating Particles */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .particle-heart {
+            font-size: 20px;
+            animation: particleFloat 1s ease-out forwards;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0) translateX(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px) translateX(30px) scale(0.5);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .game-container {
+                border-radius: 0;
+                max-width: 100%;
+                max-height: 100%;
+            }
+
+            .title {
+                font-size: 36px;
+            }
+
+            .button {
+                padding: 12px 30px;
+                font-size: 16px;
+            }
+
+            .stats-panel {
+                padding: 20px;
+                min-width: 250px;
+            }
+        }
+
+        /* Animations for collectibles collection */
+        @keyframes collectAnimation {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0);
+            }
+        }
+
+        .collectible-collected {
+            animation: collectAnimation 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="level-display">Level: <span id="levelValue">1</span></div>
+            <div class="score-display">Coins: <span id="scoreValue">0</span></div>
+            <div class="hearts-display">❤️ <span id="heartsValue">3</span></div>
+        </div>
+
+        <!-- Game Area -->
+        <div class="game-area" id="gameArea">
+            <div class="player" id="player"></div>
+            <div class="touch-controls" id="touchControls">
+                <button class="touch-btn" id="leftBtn">←</button>
+                <button class="touch-btn" id="rightBtn">→</button>
+            </div>
+        </div>
+
+        <!-- UI Overlays -->
+        <!-- Start Screen -->
+        <div class="ui-overlay" id="startScreen">
+            <div class="title">✨ Cute Pink Game ✨</div>
+            <div style="font-size: 60px;">🌸</div>
+            <div style="color: #666; font-size: 16px; text-align: center; max-width: 300px;">
+                Collect hearts 💕 and coins 🪙<br>
+                Avoid purple obstacles 💫<br>
+                Get the highest score!
+            </div>
+            <button class="button button-start" id="startBtn">Start Game</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div class="ui-overlay hidden" id="gameOverScreen">
+            <div class="game-over-text">Game Over!</div>
+            <div class="stats-panel">
+                <h2>Final Stats</h2>
+                <div class="stat-item">Level: <span class="stat-value" id="finalLevel">1</span></div>
+                <div class="stat-item">Coins: <span class="stat-value" id="finalScore">0</span></div>
+                <div class="stat-item">Hearts Collected: <span class="stat-value" id="finalHearts">0</span></div>
+            </div>
+            <button class="button button-restart" id="restartBtn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game Variables
+        const gameArea = document.getElementById('gameArea');
+        const player = document.getElementById('player');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        
+        let gameState = 'start'; // start, playing, gameOver
+        let score = 0;
+        let hearts = 3;
+        let level = 1;
+        let totalHearts = 0;
+        let playerX = 225;
+        let gameSpeed = 3;
+        let spawnRate = 2000;
+        let collectibles = [];
+        let obstacles = [];
+        let gameLoopId = null;
+        let spawnLoopId = null;
+
+        const GAME_WIDTH = 500;
+        const GAME_HEIGHT = 700;
+        const PLAYER_SIZE = 50;
+        const PLAYER_SPEED = 15;
+        const PLAYER_MIN = 0;
+        const PLAYER_MAX = GAME_WIDTH - PLAYER_SIZE;
+
+        // Touch Control
+        const touchControls = document.getElementById('touchControls');
+        const leftBtn = document.getElementById('leftBtn');
+        const rightBtn = document.getElementById('rightBtn');
+
+        let keys = {};
+        let touchActive = false;
+
+        // Detect if mobile
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // Event Listeners
+        document.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', restartGame);
+
+        leftBtn.addEventListener('touchstart', () => {
+            keys['arrowleft'] = true;
+        });
+
+        leftBtn.addEventListener('touchend', () => {
+            keys['arrowleft'] = false;
+        });
+
+        rightBtn.addEventListener('touchstart', () => {
+            keys['arrowright'] = true;
+        });
+
+        rightBtn.addEventListener('touchend', () => {
+            keys['arrowright'] = false;
+        });
+
+        // Game Functions
+        function startGame() {
+            gameState = 'playing';
+            score = 0;
+            hearts = 3;
+            level = 1;
+            totalHearts = 0;
+            playerX = 225;
+            gameSpeed = 3;
+            spawnRate = 2000;
+            collectibles = [];
+            obstacles = [];
+
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            
+            if (isMobile) {
+                touchControls.classList.add('active');
+            }
+
+            updateUI();
+            gameLoop();
+            spawnItems();
+        }
+
+        function restartGame() {
+            clearInterval(gameLoopId);
+            clearInterval(spawnLoopId);
+            startGame();
+        }
+
+        function endGame() {
+            gameState = 'gameOver';
+            clearInterval(gameLoopId);
+            clearInterval(spawnLoopId);
+            touchControls.classList.remove('active');
+
+            // Update final stats
+            document.getElementById('finalLevel').textContent = level;
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalHearts').textContent = totalHearts;
+
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        function updateUI() {
+            document.getElementById('levelValue').textContent = level;
+            document.getElementById('scoreValue').textContent = score;
+            document.getElementById('heartsValue').textContent = hearts;
+        }
+
+        function gameLoop() {
+            if (gameState !== 'playing') return;
+
+            // Player Movement
+            if (keys['arrowleft'] || keys['a']) {
+                playerX = Math.max(PLAYER_MIN, playerX - PLAYER_SPEED);
+            }
+            if (keys['arrowright'] || keys['d']) {
+                playerX = Math.min(PLAYER_MAX, playerX + PLAYER_SPEED);
+            }
+
+            player.style.left = playerX + 'px';
+
+            // Move collectibles and obstacles
+            updateCollectibles();
+            updateObstacles();
+
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function updateCollectibles() {
+            for (let i = collectibles.length - 1; i >= 0; i--) {
+                const item = collectibles[i];
+                item.y += gameSpeed;
+                item.element.style.top = item.y + 'px';
+
+                // Check collision with player
+                if (checkCollision(playerX, 680, item.x, item.y, PLAYER_SIZE, 30)) {
+                    collectItem(item, i);
+                    continue;
+                }
+
+                // Remove if out of bounds
+                if (item.y > 800) {
+                    item.element.remove();
+                    collectibles.splice(i, 1);
+                }
+            }
+        }
+
+        function updateObstacles() {
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                const obstacle = obstacles[i];
+                obstacle.y += gameSpeed;
+                obstacle.element.style.top = obstacle.y + 'px';
+
+                // Check collision with player
+                if (checkCollision(playerX, 680, obstacle.x, obstacle.y, PLAYER_SIZE, 45)) {
+                    hitObstacle(i);
+                    continue;
+                }
+
+                // Remove if out of bounds
+                if (obstacle.y > 800) {
+                    obstacle.element.remove();
+                    obstacles.splice(i, 1);
+                }
+            }
+        }
+
+        function collectItem(item, index) {
+            createParticles(item.x, item.y);
+            item.element.remove();
+            
+            if (item.type === 'heart') {
+                totalHearts++;
+                score += 10;
+            } else if (item.type === 'coin') {
+                score += 5;
+            }
+
+            collectibles.splice(index, 1);
+            updateUI();
+            checkLevelUp();
+        }
+
+        function hitObstacle(index) {
+            hearts--;
+            obstacles[index].element.remove();
+            obstacles.splice(index, 1);
+            updateUI();
+
+            if (hearts <= 0) {
+                endGame();
+            }
+        }
+
+        function checkLevelUp() {
+            const newLevel = Math.floor(score / 100) + 1;
+            if (newLevel > level) {
+                level = newLevel;
+                gameSpeed += 1;
+                spawnRate = Math.max(800, spawnRate - 200);
+                createLevelUpAnimation();
+            }
+        }
+
+        function createLevelUpAnimation() {
+            const levelText = document.createElement('div');
+            levelText.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 48px;
+                font-weight: bold;
+                color: #ff1493;
+                z-index: 300;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+                animation: levelUpFloat 1.5s ease-out forwards;
+                pointer-events: none;
+            `;
+            levelText.textContent = `Level ${level}! 🎉`;
+            gameArea.appendChild(levelText);
+
+            setTimeout(() => levelText.remove(), 1500);
+        }
+
+        function checkCollision(x1, y1, x2, y2, size1, size2) {
+            const dx = (x1 + size1 / 2) - (x2 + size2 / 2);
+            const dy = (y1 + size1 / 2) - (y2 + size2 / 2);
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance < (size1 + size2) / 2;
+        }
+
+        function spawnItems() {
+            if (gameState !== 'playing') return;
+
+            const heartChance = Math.random() < 0.4 ? true : false;
+            const type = heartChance ? 'heart' : 'coin';
+            const x = Math.random() * (GAME_WIDTH - 30);
+
+            if (type === 'heart') {
+                createHeart(x, -30);
+            } else {
+                createCoin(x, -30);
+            }
+
+            // Spawn obstacles
+            if (Math.random() < 0.6) {
+                createObstacle(Math.random() * (GAME_WIDTH - 45), -45);
+            }
+
+            spawnLoopId = setTimeout(spawnItems, spawnRate);
+        }
+
+        function createHeart(x, y) {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.textContent = '💕';
+            heart.style.left = x + 'px';
+            heart.style.top = y + 'px';
+            gameArea.appendChild(heart);
+
+            collectibles.push({
+                element: heart,
+                x: x,
+                y: y,
+                type: 'heart'
+            });
+        }
+
+        function createCoin(x, y) {
+            const coin = document.createElement('div');
+            coin.className = 'coin';
+            coin.textContent = '🪙';
+            coin.style.left = x + 'px';
+            coin.style.top = y + 'px';
+            gameArea.appendChild(coin);
+
+            collectibles.push({
+                element: coin,
+                x: x,
+                y: y,
+                type: 'coin'
+            });
+        }
+
+        function createObstacle(x, y) {
+            const obstacle = document.createElement('div');
+            obstacle.className = 'obstacle';
+            obstacle.textContent = '💫';
+            obstacle.style.left = x + 'px';
+            obstacle.style.top = y + 'px';
+            obstacle.style.fontSize = '25px';
+            obstacle.style.display = 'flex';
+            obstacle.style.justifyContent = 'center';
+            obstacle.style.alignItems = 'center';
+            gameArea.appendChild(obstacle);
+
+            obstacles.push({
+                element: obstacle,
+                x: x,
+                y: y
+            });
+        }
+
+        function createParticles(x, y) {
+            for (let i = 0; i < 5; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle particle-heart';
+                particle.textContent = '✨';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.fontSize = Math.random() * 15 + 10 + 'px';
+                gameArea.appendChild(particle);
+
+                setTimeout(() => particle.remove(), 1000);
+            }
+        }
+
+        // Add CSS animation for levelUp
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes levelUpFloat {
+                0% {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1);
+                }
+                100% {
+                    opacity: 0;
+                    transform: translate(-50%, -150px) scale(1.5);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize
+        updateUI();
+    </script>
+</body>
+</html>
